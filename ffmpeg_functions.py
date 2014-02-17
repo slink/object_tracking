@@ -1,11 +1,12 @@
-import glob, re, os, shutil
+import glob, re, os, shutil, math
 from scipy.misc import imread, imsave
 import numpy as np
 import subprocess as sp
 from datetime import datetime, timedelta
 
 
-def video_to_stills(FFMPEG_BINARY, filename, start = NaN, finish = NaN, folder):
+def video_to_stills(FFMPEG_BINARY, filename, 
+                    folder, start = float('NaN'), finish = float('NaN')):
     
     if math.isnan(start):
         print 'video start set at 0 sec.'
@@ -18,6 +19,7 @@ def video_to_stills(FFMPEG_BINARY, filename, start = NaN, finish = NaN, folder):
 
     calling_dir = os.getcwd()
     folder_path = os.path.join(calling_dir, folder)
+    file_path = os.path.join(calling_dir, filename)
     
     if not os.path.exists(folder_path):
         os.mkdir(folder)
@@ -28,13 +30,13 @@ def video_to_stills(FFMPEG_BINARY, filename, start = NaN, finish = NaN, folder):
         raise
 
     try:
-        shutil.copy2(filename, folder_path)
+        shutil.copy2(file_path, folder_path)
     except:
         raise
 
     proc = sp.Popen([FFMPEG_BINARY, '-ss', start,
                     '-t', finish, '-i', filename, 
-                    '-r', fps, 'test%4d.jpg'],
+                    '-r', str(fps), 'test%4d.jpg'],
                     stdin=sp.PIPE,
                     stdout=sp.PIPE,
                     stderr=sp.PIPE)
@@ -43,7 +45,7 @@ def video_to_stills(FFMPEG_BINARY, filename, start = NaN, finish = NaN, folder):
     proc.terminate()
 
     try:
-        os.remove(filename)
+        os.remove(file_path)
     except:
         raise
 
@@ -63,21 +65,19 @@ def load_video_data(FFMPEG_BINARY, filename):
     proc.stdout.readline()
     proc.terminate()
     infos = proc.stderr.read()
-    if print_infos:
-        # print the whole info text returned by FFMPEG
-        print infos
-
+    
     lines = infos.splitlines()
     if "No such file or directory" in lines[-1]:
         raise IOError("%s not found ! Wrong path ?" % filename)
 
     # get the output line that speaks about video
     line = [l for l in lines if ' Video: ' in l][0]
-    return line
+    return lines
 
 def video_size(FFMPEG_BINARY, filename):
     # This function is substantially based on one found at http://zulko.github.io/moviepy/
-    line = load_video_data(FFMPEG_BINARY, filename)
+    lines = load_video_data(FFMPEG_BINARY, filename)
+    line = [l for l in lines if ' Video: ' in l][0]
 
     # get the size, of the form 460x320 (w x h)
     match = re.search(" [0-9]*x[0-9]*(,| )", line)
@@ -86,8 +86,9 @@ def video_size(FFMPEG_BINARY, filename):
 
 def video_fps(FFMPEG_BINARY, filename):
     # This function is substantially based on one found at http://zulko.github.io/moviepy/
-    line = load_video_data(FFMPEG_BINARY, filename)
-
+    lines = load_video_data(FFMPEG_BINARY, filename)
+    line = [l for l in lines if ' Video: ' in l][0]
+    
     # get the frame rate
     match = re.search("( [0-9]*.| )[0-9]* (tbr|fps)", line)
     fps = float(line[match.start():match.end()].split(' ')[1])
@@ -95,8 +96,9 @@ def video_fps(FFMPEG_BINARY, filename):
 
 def video_duration(FFMPEG_BINARY, filename):
     # This function is substantially based on one found at http://zulko.github.io/moviepy/
-    line = load_video_data(FFMPEG_BINARY, filename)
-
+    lines = load_video_data(FFMPEG_BINARY, filename)
+    line = [l for l in lines if ' Video: ' in l][0]
+    
     # get duration (in seconds)
     line = [l for l in lines if 'Duration: ' in l][0]
     match = re.search(" [0-9][0-9]:[0-9][0-9]:[0-9][0-9].[0-9][0-9]", line)

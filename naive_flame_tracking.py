@@ -1,4 +1,4 @@
-# fmpeg -ss 00:00:11 -t 00:00:15 -i test.mp4 -r 25.0 test%4d.jpg
+# ffmpeg -ss 00:00:11 -t 00:00:15 -i test.mp4 -r 25.0 test%4d.jpg
 # import moviepy.video.io.ffmpeg_tools as ffmpeg_tools
 # import moviepy.video.io.ffmpeg_reader as ffmpeg_reader
 
