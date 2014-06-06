@@ -1,5 +1,9 @@
 *.py[cod]
 *.log
+# output files
+*.csv
+*.png
+*.jpeg
 
 test_jpgs
 test_videos
