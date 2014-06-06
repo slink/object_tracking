@@ -1,8 +1,15 @@
 *.py[cod]
 *.log
+# output files
+*.csv
+*.png
+*.jpeg
+*.xls
+*.xlsx
 
 test_jpgs
 test_videos
+test_code
 
 # ipython checkpoint stuff
 .ipynb_checkpoints
