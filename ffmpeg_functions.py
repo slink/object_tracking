@@ -5,37 +5,45 @@ import subprocess as sp
 from datetime import datetime, timedelta
 
 
-def video_to_stills(FFMPEG_BINARY, filename, 
-                    folder, start = float('NaN'), finish = float('NaN')):
+def video_to_stills(FFMPEG_BINARY, video_path, 
+                    image_folder, start = float('NaN'), finish = float('NaN')):
     
-    if math.isnan(start):
+    if math.isnan(float(start)):
         print 'video start set at 0 sec.'
         start = HHMMSS(0)
-    if math.isnan(finish):
+    elif type(start) == str:
+        start = HHMMSS(float(start))
+    
+    if math.isnan(float(finish)):
         print 'assuming length of test for duration'
-        finish = HHMMSS(video_duration(FFMPEG_BINARY, filename))
+        finish = HHMMSS(video_duration(FFMPEG_BINARY, video_path))
+    elif type(finish) == str:
+        finish = HHMMSS(float(finish))
 
-    fps = video_fps(FFMPEG_BINARY, filename)
+    fps = video_fps(FFMPEG_BINARY, video_path)
+
+    abs_video_path = os.path.abspath(video_path)
+    video_path, video_name =  os.path.split(abs_video_path)
 
     calling_dir = os.getcwd()
-    folder_path = os.path.join(calling_dir, folder)
-    file_path = os.path.join(calling_dir, filename)
-    
-    if not os.path.exists(folder_path):
-        os.mkdir(folder)
+    image_folder_path = os.path.join(calling_dir, image_folder)
+
+    if not os.path.exists(image_folder_path):
+        os.mkdir(image_folder)
 
     try:
-        os.chdir(folder_path)
+        os.chdir(image_folder_path)
     except:
         raise
 
     try:
-        shutil.copy2(file_path, folder_path)
+        shutil.copy2(abs_video_path, image_folder_path)
     except:
         raise
+    new_video_path = os.path.join(image_folder_path, video_name)
 
     proc = sp.Popen([FFMPEG_BINARY, '-ss', start,
-                    '-t', finish, '-i', filename, 
+                    '-t', finish, '-i', abs_video_path, 
                     '-r', str(fps), 'test%4d.jpg'],
                     stdin=sp.PIPE,
                     stdout=sp.PIPE,
@@ -45,7 +53,7 @@ def video_to_stills(FFMPEG_BINARY, filename,
     proc.terminate()
 
     try:
-        os.remove(file_path)
+        os.remove(new_video_path)
     except:
         raise
 
@@ -53,7 +61,6 @@ def video_to_stills(FFMPEG_BINARY, filename,
         os.chdir(calling_dir)
     except:
         raise
-
 
 def load_video_data(FFMPEG_BINARY, filename):
     # This function is substantially based on one found at http://zulko.github.io/moviepy/
@@ -106,7 +113,14 @@ def video_duration(FFMPEG_BINARY, filename):
     duration = cvsecs(*hms)
     return duration
     # nframes = int(duration*fps)
-    
+
+def all_infos(FFMPEG_BINARY, filename):
+    size = video_size(FFMPEG_BINARY, filename)
+    fps = video_fps(FFMPEG_BINARY, filename)
+    duration = video_duration(FFMPEG_BINARY, filename)
+
+    return fps, duration, size
+
 def cvsecs(*args):
     # This function is substantially based on one found at http://zulko.github.io/moviepy/
     # used from within video_duration
@@ -126,7 +140,7 @@ def cvsecs(*args):
 
 def HHMMSS(sec):
     # based on http://stackoverflow.com/a/4048773/1902480
-    sec = timedelta(sec)
+    sec = timedelta(seconds = sec)
     d = datetime(1900,1,1) + sec
-    
+    print d
     return '{:%H:%M:%S}'.format(d)
