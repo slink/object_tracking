@@ -4,6 +4,8 @@
 *.csv
 *.png
 *.jpeg
+*.xls
+*.xlsx
 
 test_jpgs
 test_videos
