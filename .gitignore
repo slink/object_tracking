@@ -9,6 +9,7 @@
 
 test_jpgs
 test_videos
+test_code
 
 # ipython checkpoint stuff
 .ipynb_checkpoints
