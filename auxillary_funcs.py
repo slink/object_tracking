@@ -111,27 +111,33 @@ def pick_ymin(ymin_vec, ymin, area, centroid):
     ymin = [ymin[i] for i in sorted_ind]
 
     if ymin_vec:
-        if ymin and ymin[0] >= ymin_vec[-1]:
-            return ymin[0]
-        elif ymin and ymin[0] < ymin_vec[-1]:
-            return np.sort(ymin)[::-1][0]
-        else: 
-            return np.nan
-        """
-        # something like: if ymin[0] > ymin_vec[-1] the use ymin[0]
+        # something like if ymin[0] > ymin_vec[-1] the use ymin[0]
         if ymin[0] >= ymin_vec[-1]:
             return ymin[0]
         else:
-        # if ymin[0] is not larger than the last ymin[0] then use the 
-        # largest one found otherwise return np.nan
             matches = [i for i in ymin if i < ymin_vec[-1]]
             if matches: return matches[0] 
             else: return np.nan
-        """
     else:
         # first frame -- just to get things rolling
         return ymin[0]
-
+    """
+    # print 'ymin''s length is: ' + str(len(ymin))
+    # just to get the ball rolling
+    # if ymin is empty (empty lists are FALSE)
+    if not ymin:
+        # print 'adding a nan to the list'
+        return np.nan
+    elif ymin and len(ymin_vec) < 5:
+        # print 'adding ' + str(ymin[0]) + ' to the list'
+        return ymin[0]
+    # if neither are empty and criterion is met
+    elif ymin and abs(zscore(ymin[0], ymin_vec)) < 3:
+        return ymin[0]
+    # if neither are empty but ymin does not meet z-score criterian
+    else:
+        return np.nanmean(ymin_vec)
+    """
 
 def moving_average(a, n=3) :
     ret = np.cumsum(a, dtype=float)

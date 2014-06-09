@@ -23,7 +23,7 @@ def video_track(FFMPEG_BINARY, video_name, fps = 24,
     n = 12
     thresh = 0.75
     zoi = np.s_[150:900, 850:1050]
-    regex = re.compile("0[0-9][0-9][0-9]")
+    regex = re.compile("[0-9][0-9][0-9][0-9]")
 
     stills = segment_extractor(FFMPEG_BINARY, video_name, fps = str(fps),\
                            start_time = HHMMSS(start_time), duration = duration)
@@ -57,7 +57,7 @@ def video_track(FFMPEG_BINARY, video_name, fps = 24,
         ymin_global.append(ymin_picked)
 
         
-        if plotting_flag and (i % 48 == 0):
+        if plotting_flag and (i % 96 == 0):
             plt.figure()
             plt.subplot(1,3,1)
             plt.imshow(-thresh_mat, cmap='Greys')
@@ -74,6 +74,7 @@ def video_track(FFMPEG_BINARY, video_name, fps = 24,
             num = regex.findall(im[1])[0]
 
             plt.savefig(file_name + num + '.png', bbox_inches='tight')
+            plt.close()
 
         update_progress(float(i)/float(len(im_set)))
     
@@ -102,17 +103,19 @@ if __name__ == '__main__':
     """
 
     video_name = './test_videos/may_29_14_t1r.mov'
-    
+    video_length = video_duration(FFMPEG_BINARY, video_name)
+
     start_time = 100
-    dur = 20
+    dur = (video_length - start_time)
     fps = 24
 
-    try:
-        video_length = video_duration(FFMPEG_BINARY, video_name)
-        y_min, stills = video_track(FFMPEG_BINARY, video_name, fps = fps, 
-                                start_time = start_time, duration = dur, plotting_flag = True)
-    except Exception, e:
-        raise e
+    #try:
+    video_length = video_duration(FFMPEG_BINARY, video_name)
+    y_min, stills = video_track(FFMPEG_BINARY, video_name, fps = fps, 
+                            start_time = start_time, 
+                            duration = dur, plotting_flag = True)
+    #except Exception, e:
+    #    raise e
     
     print 'extracted ' + str(dur)  + ' sec. of video'
 
@@ -121,6 +124,7 @@ if __name__ == '__main__':
     except Exception, e:
         raise e
     finally:
+        print 'removing ' + str(len(stills)) + ' jpegs'
         removal_check = [os.remove(still) for still in stills]
 
 
