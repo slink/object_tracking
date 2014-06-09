@@ -29,9 +29,12 @@ def save_to_csv(x, file_name = 'foo.txt'):
     
     if not os.path.isfile(csv_file_name):
         np.savetxt(csv_file_name, x, delimiter=",", fmt = '%.2f')
+        return csv_file_name
+
     else: 
         with open(csv_file_name, 'a') as f_handle:
             np.savetxt(f_handle, x, delimiter=",", fmt = '%.2f')
+        return csv_file_name
 
 def rgb2gray(image):
     # The sRGB color space is defined in terms of the CIE 1931 linear 
@@ -108,10 +111,12 @@ def pick_ymin(ymin_vec, ymin, area, centroid):
     ymin = [ymin[i] for i in sorted_ind]
 
     if ymin_vec:
-        # something like if ymin[0] > ymin_vec[-1] the use ymin[0]
+        # something like: if ymin[0] > ymin_vec[-1] the use ymin[0]
         if ymin[0] >= ymin_vec[-1]:
             return ymin[0]
         else:
+        # if ymin[0] is not larger than the last ymin[0] then use the 
+        # largest one found otherwise return np.nan
             matches = [i for i in ymin if i < ymin_vec[-1]]
             if matches: return matches[0] 
             else: return np.nan
