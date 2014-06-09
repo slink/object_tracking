@@ -20,7 +20,7 @@ def video_track(FFMPEG_BINARY, video_name, fps = 24,
     duration -> the number of seconds to extract to stills at one time
     """
 
-    n = 9
+    n = 12
     thresh = 0.75
     zoi = np.s_[150:900, 850:1050]
     regex = re.compile("0[0-9][0-9][0-9]")
@@ -57,7 +57,7 @@ def video_track(FFMPEG_BINARY, video_name, fps = 24,
         ymin_global.append(ymin_picked)
 
         
-        if plotting_flag and (i % 20 == 0):
+        if plotting_flag and (i % 48 == 0):
             plt.figure()
             plt.subplot(1,3,1)
             plt.imshow(-thresh_mat, cmap='Greys')
@@ -104,7 +104,7 @@ if __name__ == '__main__':
     video_name = './test_videos/may_29_14_t1r.mov'
     
     start_time = 100
-    dur = 10
+    dur = 20
     fps = 24
 
     try:
@@ -115,7 +115,6 @@ if __name__ == '__main__':
         raise e
     
     print 'extracted ' + str(dur)  + ' sec. of video'
-    print y_min
 
     try:
         save_to_csv(y_min, file_name = video_name)

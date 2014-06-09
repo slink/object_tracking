@@ -111,6 +111,13 @@ def pick_ymin(ymin_vec, ymin, area, centroid):
     ymin = [ymin[i] for i in sorted_ind]
 
     if ymin_vec:
+        if ymin and ymin[0] >= ymin_vec[-1]:
+            return ymin[0]
+        elif ymin and ymin[0] < ymin_vec[-1]:
+            return np.sort(ymin)[::-1][0]
+        else: 
+            return np.nan
+        """
         # something like: if ymin[0] > ymin_vec[-1] the use ymin[0]
         if ymin[0] >= ymin_vec[-1]:
             return ymin[0]
@@ -120,6 +127,7 @@ def pick_ymin(ymin_vec, ymin, area, centroid):
             matches = [i for i in ymin if i < ymin_vec[-1]]
             if matches: return matches[0] 
             else: return np.nan
+        """
     else:
         # first frame -- just to get things rolling
         return ymin[0]
